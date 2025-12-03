@@ -16,7 +16,8 @@ The goal is to classify news articles as *fake* or *true*, using both the title 
 ---
 
 ## 🗂 Project Structure
-```
+```markdown
+```text
 fake-news-classifier/
 │
 ├── dataset/ ← datasets (train/test CSV, NOT uploaded to GitHub)
@@ -50,6 +51,7 @@ pip install -r requirements.txt
 ```
 
 📦 Requirements
+```text
 numpy
 pandas
 scikit-learn
@@ -57,7 +59,7 @@ matplotlib
 seaborn
 torch
 transformers
-
+```
 
 You can install them all at once with:
 ```bash
