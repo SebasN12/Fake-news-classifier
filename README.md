@@ -17,7 +17,6 @@ The goal is to classify news articles as *fake* or *true*, using both the title 
 
 ## 🗂 Project Structure
 ```markdown
-```text
 fake-news-classifier/
 │
 ├── dataset/ ← datasets (train/test CSV, NOT uploaded to GitHub)
@@ -66,29 +65,31 @@ You can install them all at once with:
 pip install -r requirements.txt
 ```
 
-🚀 Usage
+## 🚀 Usage
 
-Place your dataset CSV files inside the dataset/ folder.
+1. Place your dataset CSV files inside the dataset/ folder.
 
-Preprocess the text:
+2. Preprocess the text:
 
+```bash
 python src/preprocessing.py
+```
 
+3. Train the classical model:
 
-Train the classical model:
-
+```bash
 python src/train_classic.py
+```
 
-
-Train the deep learning model:
-
+4. Train the deep learning model:
+```bash
 python src/train_deep.py
+```
 
-
-Evaluate the models:
-
+5. Evaluate the models:
+```bash
 python src/evaluate.py
-
+```
 
 
 📊 Results
