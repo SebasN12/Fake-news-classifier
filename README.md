@@ -16,7 +16,7 @@ The goal is to classify news articles as *fake* or *true*, using both the title 
 ---
 
 ## 🗂 Project Structure
-
+```
 fake-news-classifier/
 │
 ├── dataset/ ← datasets (train/test CSV, NOT uploaded to GitHub)
@@ -34,7 +34,7 @@ fake-news-classifier/
 ├── README.md
 ├── requirements.txt
 └── .gitignore
-
+```
 > **Note:** `dataset/` and `metrics/` folders are excluded from GitHub using `.gitignore` to avoid uploading large files.
 
 ---
@@ -47,6 +47,7 @@ Clone the repository and install dependencies:
 git clone https://github.com/SebasN12/Fake-news-classifier.git
 cd fake-news-classifier
 pip install -r requirements.txt
+```
 
 📦 Requirements
 numpy
@@ -59,7 +60,9 @@ transformers
 
 
 You can install them all at once with:
+```bash
 pip install -r requirements.txt
+```
 
 🚀 Usage
 
