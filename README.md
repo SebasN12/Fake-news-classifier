@@ -19,21 +19,24 @@ The goal is to classify news articles as *fake* or *true*, using both the title 
 ```markdown
 fake-news-classifier/
 │
-├── dataset/ ← datasets (train/test CSV, NOT uploaded to GitHub)
+├── dataset/                       ← datasets (train/test CSV, NOT uploaded to GitHub)
 │
-├── src/ ← source code
-│ ├── preprocessing.py ← text cleaning and preprocessing
-│ ├── classic_model.py ← classical ML model implementation
-│ ├── deep_model.py ← deep learning model implementation
-│ ├── train_classic.py ← script to train classical model
-│ ├── train_deep.py ← script to train deep learning model
-│ └── evaluate.py ← evaluation functions (metrics, confusion matrix)
+├── src/                           ← source code
+│   ├── classic/                   ← classical ML model implementation and training
+│   ├── deepL/                     ← deep learning model implementation and training
+│   │
+│   ├── metrics/                   ← evaluation of models
+│   │   ├── classic/               ← classical ML model evaluation
+│   │   └── deepL/                 ← deep learning model evaluation
+│   │
+│   └── preprocessing.py           ← text cleaning and preprocessing 
 │
-├── metrics/ ← evaluation outputs (plots, reports)
+├── metrics/                       ← evaluation OUTPUTS (plots, reports, CSVs, images)
 │
 ├── README.md
 ├── requirements.txt
 └── .gitignore
+
 ```
 > **Note:** `dataset/` and `metrics/` folders are excluded from GitHub using `.gitignore` to avoid uploading large files.
 
