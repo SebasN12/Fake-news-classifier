@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report, accuracy_score, matthews_corrcoef, confusion_matrix
@@ -35,15 +36,23 @@ svm.fit(X_train_vec, y_train)
 
 y_pred = svm.predict(X_test_vec)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("MCC:", matthews_corrcoef(y_test, y_pred))
-print(classification_report(y_test, y_pred))
+# Evaluation outputs
+
+Path('metrics').mkdir(exist_ok=True)
 
 labels = ['Real', 'Fake']
-print(classification_report(y_test, y_pred, target_names=labels, zero_division=0))
+report = classification_report(y_test, y_pred, target_names=labels, zero_division=0)
+
+with open('metrics\\svm_classification_report.txt', 'w') as f:
+    f.write(f"Accuracy: {accuracy_score(y_test, y_pred)}\n")
+    f.write(f"MCC: {matthews_corrcoef(y_test, y_pred)}\n\n")
+    f.write(report)
+
+
 cm = confusion_matrix(y_test, y_pred)
 s = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
 s.set_xlabel('Predicted')
 s.set_ylabel('Actual')
 s.set_title('Confusion matrix')
 s.figure.tight_layout()
+s.figure.savefig('metrics\\svm_confusion_matrix.png', dpi=300)
