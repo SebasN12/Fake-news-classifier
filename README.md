@@ -61,6 +61,7 @@ matplotlib
 seaborn
 torch
 transformers
+nltk
 ```
 
 You can install them all at once with:
