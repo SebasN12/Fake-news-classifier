@@ -22,12 +22,8 @@ fake-news-classifier/
 ├── dataset/                       ← datasets (train/test CSV, NOT uploaded to GitHub)
 │
 ├── src/                           ← source code
-│   ├── classic/                   ← classical ML model implementation and training
-│   ├── deepL/                     ← deep learning model implementation and training
-│   │
-│   ├── metrics/                   ← evaluation of models
-│   │   ├── classic/               ← classical ML model evaluation
-│   │   └── deepL/                 ← deep learning model evaluation
+│   ├── classic/                   ← classical ML model implementation, training and evaluation
+│   ├── deepL/                     ← deep learning model implementation, training and evaluation
 │   │
 │   └── preprocessing.py           ← text cleaning and preprocessing 
 │
@@ -49,7 +45,6 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/SebasN12/Fake-news-classifier.git
 cd fake-news-classifier
-pip install -r requirements.txt
 ```
 
 📦 Requirements
@@ -61,6 +56,7 @@ matplotlib
 seaborn
 torch
 transformers
+nltk
 ```
 
 You can install them all at once with:
@@ -78,20 +74,15 @@ pip install -r requirements.txt
 python src/preprocessing.py
 ```
 
-3. Train the classical model:
+3. Train and evaluate the classical model:
 
 ```bash
-python src/train_classic.py
+python src/classic/train_classic.py
 ```
 
-4. Train the deep learning model:
+4. Train and evaluate the deep learning model:
 ```bash
-python src/train_deep.py
-```
-
-5. Evaluate the models:
-```bash
-python src/evaluate.py
+python src/deepL/train_deep.py
 ```
 
 
