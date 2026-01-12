@@ -1,58 +1,105 @@
 from pathlib import Path
-import pandas as pd
+import pickle
 from sklearn.svm import SVC
+from sklearn.model_selection import RandomizedSearchCV, train_test_split, cross_val_score
 from sklearn.metrics import classification_report, accuracy_score, matthews_corrcoef, confusion_matrix
 import seaborn as sns
-from sklearn.feature_extraction.text import CountVectorizer
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-import nltk
+import matplotlib.pyplot as plt
 
-nltk.download('punkt')
-nltk.download('stopwords')
+RANDOM_SEED = 42
+CV_FOLDS = 5
+SUBSET_TUNING_RATIO = 0.3
 
-df_train = pd.read_csv('dataset\\train.csv').fillna('')
-df_test = pd.read_csv('dataset\\test.csv').fillna('')
+# -------------------------------
+# Load preprocessed matrices and classes
+# -------------------------------
 
-X_train = df_train['text']
-y_train = df_train['is_fake']
-X_test = df_test['text']
-y_test = df_test['is_fake']
+X_train_final = pickle.load(open('dataset/X_train_final.pkl', 'rb'))
+X_test_final = pickle.load(open('dataset/X_test_final.pkl', 'rb'))
+y_train = pickle.load(open('dataset/y_train.pkl', 'rb'))
+y_test = pickle.load(open('dataset/y_test.pkl', 'rb'))
 
-stemmer = PorterStemmer()
-stopwords_en = set(stopwords.words('english'))
+#directory for metrics
+Path('metrics').mkdir(exist_ok=True)
 
-def stemmed_words(doc):
-    return [stemmer.stem(w.lower()) for w in word_tokenize(doc) if w.lower() not in stopwords_en]
+# -------------------------------
+# Version 1: Basic SVM training
+# -------------------------------
 
-vectorizer = CountVectorizer(lowercase=True, strip_accents='unicode', tokenizer=stemmed_words)
-
-X_train_vec = vectorizer.fit_transform(X_train)
-X_test_vec = vectorizer.transform(X_test)
-
-svm = SVC()
-svm.fit(X_train_vec, y_train)
-
-y_pred = svm.predict(X_test_vec)
+svm_basic = SVC(random_state=RANDOM_SEED)
+svm_basic.fit(X_train_final, y_train)
+y_pred_basic = svm_basic.predict(X_test_final)
 
 # Evaluation outputs
 
-Path('metrics').mkdir(exist_ok=True)
-
 labels = ['Real', 'Fake']
-report = classification_report(y_test, y_pred, target_names=labels, zero_division=0)
+with open('metrics/svm_basic_report.txt', 'w') as file:
+    file.write("=== Basic SVM ===\n")
+    file.write(f"Accuracy: {accuracy_score(y_test, y_pred_basic)}\n")
+    file.write(f"MCC: {matthews_corrcoef(y_test, y_pred_basic)}\n\n")
+    file.write(classification_report(y_test, y_pred_basic, target_names=labels, zero_division=0))
 
-with open('metrics\\svm_classification_report.txt', 'w') as f:
-    f.write(f"Accuracy: {accuracy_score(y_test, y_pred)}\n")
-    f.write(f"MCC: {matthews_corrcoef(y_test, y_pred)}\n\n")
-    f.write(report)
+plt.figure()
+cm = confusion_matrix(y_test, y_pred_basic)
+cm_ax = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
+cm_ax.set_xlabel('Predicted')
+cm_ax.set_ylabel('Actual')
+cm_ax.set_title('Confusion matrix')
+plt.tight_layout()
+plt.savefig('metrics\\svm_basic_confusion_matrix.png', dpi=300)
+plt.close()
 
+# -------------------------------
+# Version 2: SVM with RandomizedSearchCV + 5-fold CV on a subset
+# -------------------------------
 
-cm = confusion_matrix(y_test, y_pred)
-s = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
-s.set_xlabel('Predicted')
-s.set_ylabel('Actual')
-s.set_title('Confusion matrix')
-s.figure.tight_layout()
-s.figure.savefig('metrics\\svm_confusion_matrix.png', dpi=300)
+# Create subset for tuning
+X_train_sub, _, y_train_sub, _ = train_test_split(
+    X_train_final, y_train, test_size=1-SUBSET_TUNING_RATIO,
+    random_state=RANDOM_SEED, stratify=y_train
+)
+
+param_dist = {
+    'C': [0.1, 1, 10],
+    'kernel': ['linear', 'rbf', 'poly'],
+    'gamma': ['scale', 'auto']
+}
+
+random_search = RandomizedSearchCV(
+    estimator=SVC(random_state=RANDOM_SEED),
+    param_distributions=param_dist,
+    n_iter=5,
+    cv=CV_FOLDS,
+    scoring='accuracy',
+    random_state=RANDOM_SEED,
+    n_jobs=-1
+)
+
+random_search.fit(X_train_sub, y_train_sub)
+
+best_params = random_search.best_params_
+best_score_cv = random_search.best_score_
+
+svm_final = SVC(**best_params, random_state=RANDOM_SEED)
+svm_final.fit(X_train_final, y_train)
+y_pred_final = svm_final.predict(X_test_final)
+
+# Evaluation outputs
+
+with open('metrics/svm_final_report.txt', 'w') as file:
+    file.write("=== SVM with Hyperparameter Tuning ===\n")
+    file.write(f"Best CV Accuracy (subset): {best_score_cv:.4f}\n")
+    file.write(f"Best Hyperparameters: {best_params}\n\n")
+    file.write(f"Test Accuracy: {accuracy_score(y_test, y_pred_final):.4f}\n")
+    file.write(f"Test MCC: {matthews_corrcoef(y_test, y_pred_final):.4f}\n\n")
+    file.write(classification_report(y_test, y_pred_final, target_names=labels, zero_division=0))
+
+plt.figure()
+cm = confusion_matrix(y_test, y_pred_final)
+cm_ax = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
+cm_ax.set_xlabel('Predicted')
+cm_ax.set_ylabel('Actual')
+cm_ax.set_title('Confusion matrix')
+plt.tight_layout()
+plt.savefig('metrics\\svm_final_confusion_matrix.png', dpi=300)
+plt.close()
