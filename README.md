@@ -102,4 +102,4 @@ This structure is modular, so you can easily extend it with new models or prepro
 👥 Collaborators
 
 - @SebasN12
--
+- @Heiligenthal
