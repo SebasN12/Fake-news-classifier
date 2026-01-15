@@ -50,7 +50,7 @@ plt.savefig('metrics\\svm_basic_confusion_matrix.png', dpi=300)
 plt.close()
 
 # -------------------------------
-# Version 2: SVM with RandomizedSearchCV + 5-fold CV on a subset
+# Version 2: SVM with RandomizedSearchCV + 5-fold CV on a subset (for optimization reasons)
 # -------------------------------
 
 # Create subset for tuning
