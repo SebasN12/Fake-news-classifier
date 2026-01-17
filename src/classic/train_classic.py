@@ -9,7 +9,7 @@ from compare_models import run_comparison
 
 
 def main():
-    run_comparison(include_deep=False, max_samples=0.1, balance_classes=True)
+    run_comparison(include_deep=False)
 
 
 if __name__ == "__main__":

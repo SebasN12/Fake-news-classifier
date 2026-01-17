@@ -12,13 +12,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from config import ROOT_DIR
 from preprocessing import load_dataset, get_features_and_labels, load_or_create_word_counts
-from classic.classic_model import (
+from classic_model import (
     is_fake1_from_counts,
     is_fake2_from_counts,
     classify_linear_regression,
     get_linear_regression_model
 )
-from classic.LogReg import get_pipeline, get_param_grid
+from LogReg import get_pipeline, get_param_grid
 
 
 RANDOM_SEED = 42
@@ -48,6 +48,7 @@ def compute_metrics(name, y_true, y_pred):
 
 
 def main():
+    print("Starting evaluation of classic models...")
     df = load_dataset()
     X, y = get_features_and_labels(df)
     body_counts = load_or_create_word_counts(df)

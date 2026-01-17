@@ -26,9 +26,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC, SVC
 
-from classic.classic_model import LinearRegressionClassifier
-from config import ROOT_DIR
-from preprocessing import load_dataset, get_features_and_labels, sample_dataset
+from classic.Simple_models.classic_model import LinearRegressionClassifier
+from classic.Simple_models.config import ROOT_DIR
+from classic.Simple_models.preprocessing import load_dataset, get_features_and_labels, sample_dataset
 
 RANDOM_SEED = 42
 

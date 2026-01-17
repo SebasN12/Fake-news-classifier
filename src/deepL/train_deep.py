@@ -9,8 +9,8 @@ SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if SRC_DIR not in sys.path:
     sys.path.append(SRC_DIR)
 
-from config import ROOT_DIR
-from preprocessing import load_dataset, get_features_and_labels, sample_dataset
+from classic.Simple_models.config import ROOT_DIR
+from classic.Simple_models.preprocessing import load_dataset, get_features_and_labels, sample_dataset
 from deepL.deep_model import run_transformer_kfold
 
 

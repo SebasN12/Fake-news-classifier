@@ -1,7 +1,7 @@
 # Fake News Classifier
 
 This project builds a **fake news classifier** using both **classical machine learning models** and **deep learning models** (pretrained Transformers).  
-The goal is to classify news articles as *fake* or *true*, using both the title and the text of the article.
+The goal is to classify news articles as *fake* or *true*, using the title and the text of the article, aswell as other columns of the dataset if needed.
 
 ---
 
@@ -10,8 +10,9 @@ The goal is to classify news articles as *fake* or *true*, using both the title 
 - Classical NLP classifier (e.g., Logistic Regression)
 - Deep learning classifier (pretrained Transformer, TBD)
 - Performance evaluation: accuracy, F1-score, confusion matrix, MCC
-- Modular and clean code: separate scripts for preprocessing, training, and evaluation
+- Modular and clean code: separate scripts for preprocessing and training / evaluation
 - Dataset handled locally (not included in the repository)
+- Metrics and plots saved locally (not included in the repository)
 
 ---
 
@@ -22,12 +23,15 @@ fake-news-classifier/
 ├── dataset/                       ← datasets (train/test CSV, NOT uploaded to GitHub)
 │
 ├── src/                           ← source code
-│   ├── classic/                   ← classical ML model implementation, training and evaluation
-│   ├── deepL/                     ← deep learning model implementation, training and evaluation
+│   ├── classic/                   ← preprocessing and classical ML model implementation, training and evaluation
+│   │   |
+│   │   ├── Simple_models/         ← simple ML models (e.g. counting, Linear Regression, Logistic Regression)
+│   │   │
+│   │   └── SVM/
 │   │
-│   └── preprocessing.py           ← text cleaning and preprocessing 
+│   └── deepL/                     ← deep learning model
 │
-├── metrics/                       ← evaluation OUTPUTS (plots, reports, CSVs, images)
+├── metrics/                       ← evaluation OUTPUTS (plots, reports, CSVs, images, NOT uploaded to GitHub)
 │
 ├── README.md
 ├── requirements.txt
@@ -68,17 +72,9 @@ pip install -r requirements.txt
 
 1. Place your dataset CSV files inside the dataset/ folder.
 
-2. Preprocess the text:
+2. Preprocess the text: For Simple_models run the preprocess.py script. For SVM run the preprocessing_SVM.py script.
 
-```bash
-python src/preprocessing.py
-```
-
-3. Train and evaluate the classical model:
-
-```bash
-python src/classic/train_classic.py
-```
+3. Train and evaluate the classical model: Go to the respective model folder and run the training or main script. For Simple_models run the evaluateClassic.py script. For SVM run the SVM.py script.
 
 4. Train and evaluate the deep learning model:
 ```bash
@@ -102,4 +98,4 @@ This structure is modular, so you can easily extend it with new models or prepro
 👥 Collaborators
 
 - @SebasN12
--
+- @Heiligenthal
