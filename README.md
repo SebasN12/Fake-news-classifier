@@ -76,10 +76,7 @@ pip install -r requirements.txt
 
 3. Train and evaluate the classical model: Go to the respective model folder and run the training or main script. For Simple_models run the evaluateClassic.py script. For SVM run the SVM.py script.
 
-4. Train and evaluate the deep learning model:
-```bash
-python src/deepL/train_deep.py
-```
+4. Train and evaluate the deep learning model: There is no manual preprocessing for the deep learning model. You must first run the data_preparation.py file (which prepares the dataset for use by BERT) and then run BERT_base.py to train it.
 
 
 📊 Results
