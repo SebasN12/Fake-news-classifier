@@ -126,6 +126,8 @@ for epoch in range(EPOCHS):
 # Evaluation
 # --------------------
 
+print("Starting evaluation on the test set... This may take a few minutes.")
+
 model.eval()
 preds = []
 true = []
