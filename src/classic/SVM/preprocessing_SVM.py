@@ -18,6 +18,10 @@ RANDOM_SEED = 42
 
 df = pd.read_csv('dataset\\all_news.csv')
 
+# Alternatively, if using the combined dataset from Kaggle: Fake News Detection Datasets. 
+# Remember to run the combine_dataset.py first for this alternative.
+# df = pd.read_csv('dataset/combined_fake_news.csv')
+
 X_text = (df['title'] + ' ' + df['text']).fillna('')
 y = df['is_fake']
 
@@ -45,6 +49,8 @@ def stemmed_words(doc):
     return [stemmer.stem(w.lower()) for w in word_tokenize(doc) if w.lower() not in stopwords_en]
 
 vectorizer = CountVectorizer(lowercase=True, strip_accents='unicode', tokenizer=stemmed_words)
+
+print("Preprocessing text...")
 
 X_train_text_vec = vectorizer.fit_transform(X_train['text'])
 X_test_text_vec = vectorizer.transform(X_test['text'])

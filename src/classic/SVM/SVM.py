@@ -14,6 +14,8 @@ SUBSET_TUNING_RATIO = 0.3
 # Load preprocessed matrices and classes
 # -------------------------------
 
+print("Loading preprocessed data...")
+
 X_train_final = pickle.load(open('dataset/X_train_final.pkl', 'rb'))
 X_test_final = pickle.load(open('dataset/X_test_final.pkl', 'rb'))
 y_train = pickle.load(open('dataset/y_train.pkl', 'rb'))
@@ -25,6 +27,8 @@ Path('metrics').mkdir(exist_ok=True)
 # -------------------------------
 # Version 1: Basic SVM training
 # -------------------------------
+
+print("Training basic SVM...")
 
 svm_basic = SVC(random_state=RANDOM_SEED)
 svm_basic.fit(X_train_final, y_train)
@@ -48,6 +52,8 @@ cm_ax.set_title('Confusion matrix')
 plt.tight_layout()
 plt.savefig('metrics\\svm_basic_confusion_matrix.png', dpi=300)
 plt.close()
+
+print("Basic SVM evaluation metrics saved.")
 
 # -------------------------------
 # Version 2: SVM with RandomizedSearchCV + 5-fold CV on a subset (for optimization reasons)
@@ -75,11 +81,17 @@ random_search = RandomizedSearchCV(
     n_jobs=-1
 )
 
+print("Performing hyperparameter tuning with RandomizedSearchCV...")
+
 random_search.fit(X_train_sub, y_train_sub)
 
 best_params = random_search.best_params_
 best_score_cv = random_search.best_score_
 
+print(f"Best hyperparameters found: {best_params}")
+print(f"Best CV accuracy on subset: {best_score_cv:.4f}")
+
+print("Training final SVM with best hyperparameters...")
 svm_final = SVC(**best_params, random_state=RANDOM_SEED)
 svm_final.fit(X_train_final, y_train)
 y_pred_final = svm_final.predict(X_test_final)
@@ -103,3 +115,5 @@ cm_ax.set_title('Confusion matrix')
 plt.tight_layout()
 plt.savefig('metrics\\svm_final_confusion_matrix.png', dpi=300)
 plt.close()
+
+print("Final SVM evaluation metrics saved.")
