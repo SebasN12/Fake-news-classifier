@@ -1,5 +1,6 @@
 from pathlib import Path
 import pickle
+from preprocessing_SVM import isOtherDataset
 from sklearn.svm import SVC
 from sklearn.model_selection import RandomizedSearchCV, train_test_split, cross_val_score
 from sklearn.metrics import classification_report, accuracy_score, matthews_corrcoef, confusion_matrix
@@ -9,6 +10,26 @@ import matplotlib.pyplot as plt
 RANDOM_SEED = 42
 CV_FOLDS = 5
 SUBSET_TUNING_RATIO = 0.3
+
+print('Using other dataset?: ', isOtherDataset)
+
+# --------------------------------
+# Evaluation output file paths
+# --------------------------------
+
+# Paths
+basicReportPath = 'metrics/svm_basic_report_other.txt' if isOtherDataset else 'metrics/svm_basic_report.txt'
+basicConfusionMatrixPath = 'metrics\\svm_basic_confusion_matrix_other.png' if isOtherDataset else 'metrics\\svm_basic_confusion_matrix.png'
+finalReportPath = 'metrics/svm_final_report_other.txt' if isOtherDataset else 'metrics/svm_final_report.txt'
+finalConfusionMatrixPath = 'metrics\\svm_final_confusion_matrix_other.png' if isOtherDataset else 'metrics\\svm_final_confusion_matrix.png'
+
+# output titles
+
+basicReportTitle = "=== Basic SVM (other dataset) ===\n" if isOtherDataset else "=== Basic SVM ===\n"
+basicConfusionMatrixTitle = 'Basic SVM Confusion matrix (other dataset)' if isOtherDataset else 'Basic SVM Confusion matrix'
+finalReportTitle = '=== SVM with Hyperparameter tuning (other dataset) ===\n' if isOtherDataset else '=== SVM with Hyperparameter tuning ===\n'
+finalConfusionMatrixTitle = 'SVM with Hyperparameter tuning Confusion matrix (other dataset)' if isOtherDataset else 'SVM with Hyperparameter tuning Confusion matrix'
+
 
 # -------------------------------
 # Load preprocessed matrices and classes
@@ -37,8 +58,8 @@ y_pred_basic = svm_basic.predict(X_test_final)
 # Evaluation outputs
 
 labels = ['Real', 'Fake']
-with open('metrics/svm_basic_report.txt', 'w') as file:
-    file.write("=== Basic SVM ===\n")
+with open(basicReportPath, 'w') as file:
+    file.write(basicReportTitle)
     file.write(f"Accuracy: {accuracy_score(y_test, y_pred_basic)}\n")
     file.write(f"MCC: {matthews_corrcoef(y_test, y_pred_basic)}\n\n")
     file.write(classification_report(y_test, y_pred_basic, target_names=labels, zero_division=0))
@@ -48,9 +69,9 @@ cm = confusion_matrix(y_test, y_pred_basic)
 cm_ax = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
 cm_ax.set_xlabel('Predicted')
 cm_ax.set_ylabel('Actual')
-cm_ax.set_title('Confusion matrix')
+cm_ax.set_title(basicConfusionMatrixTitle)
 plt.tight_layout()
-plt.savefig('metrics\\svm_basic_confusion_matrix.png', dpi=300)
+plt.savefig(basicConfusionMatrixPath, dpi=300)
 plt.close()
 
 print("Basic SVM evaluation metrics saved.")
@@ -98,8 +119,8 @@ y_pred_final = svm_final.predict(X_test_final)
 
 # Evaluation outputs
 
-with open('metrics/svm_final_report.txt', 'w') as file:
-    file.write("=== SVM with Hyperparameter Tuning ===\n")
+with open(finalReportPath, 'w') as file:
+    file.write(finalReportTitle)
     file.write(f"Best CV Accuracy (subset): {best_score_cv:.4f}\n")
     file.write(f"Best Hyperparameters: {best_params}\n\n")
     file.write(f"Test Accuracy: {accuracy_score(y_test, y_pred_final):.4f}\n")
@@ -111,9 +132,9 @@ cm = confusion_matrix(y_test, y_pred_final)
 cm_ax = sns.heatmap(cm, annot=True, fmt='d', cmap='rocket', xticklabels=labels, yticklabels=labels)
 cm_ax.set_xlabel('Predicted')
 cm_ax.set_ylabel('Actual')
-cm_ax.set_title('Confusion matrix')
+cm_ax.set_title(finalConfusionMatrixTitle)
 plt.tight_layout()
-plt.savefig('metrics\\svm_final_confusion_matrix.png', dpi=300)
+plt.savefig(finalConfusionMatrixPath, dpi=300)
 plt.close()
 
 print("Final SVM evaluation metrics saved.")

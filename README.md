@@ -8,11 +8,13 @@ The goal is to classify news articles as *fake* or *true*, using the title and t
 ## 📌 Features
 
 - Classical NLP classifier (e.g., Logistic Regression)
-- Deep learning classifier (pretrained Transformer, TBD)
+- Deep learning classifier (BERT-base-uncased)
 - Performance evaluation: accuracy, F1-score, confusion matrix, MCC
 - Modular and clean code: separate scripts for preprocessing and training / evaluation
 - Dataset handled locally (not included in the repository)
 - Metrics and plots saved locally (not included in the repository)
+- Combine datasets: script to merge fake and true news datasets into a single CSV
+- Dataset adapter: allows easy integration of new datasets with different column names or label formats
 
 ---
 
@@ -29,7 +31,11 @@ fake-news-classifier/
 │   │   │
 │   │   └── SVM/
 │   │
-│   └── deepL/                     ← deep learning model
+│   ├── deepL/                     ← deep learning model
+│   │
+│   ├── combine_dataset.py         ← combine fake and true news datasets into a single CSV
+│   │
+│   └── dataset_adapter.py         ← Script to adapt different datasets to a common format
 │
 ├── metrics/                       ← evaluation OUTPUTS (plots, reports, CSVs, images, NOT uploaded to GitHub)
 │
@@ -67,16 +73,21 @@ You can install them all at once with:
 ```bash
 pip install -r requirements.txt
 ```
+⚠️ **Important:** For GPU support with deep learning models, it is recommended to use Python 3.11, due to compatibility issues with some versions of torch and transformers.
 
 ## 🚀 Usage
 
-1. Place your dataset CSV files inside the dataset/ folder.
+1. Prepare your dataset:
 
-2. Preprocess the text: For Simple_models run the preprocess.py script. For SVM run the preprocessing_SVM.py script.
+- Place your dataset CSV files inside the dataset/ folder.
+- If your dataset is splitted into fake and true news files, you can use the combine_dataset.py script to merge them into a single CSV file. The splitted files should not be labeled before combining.
+- If your dataset has different column names or label formats, use the dataset_adapter.py script to convert it to the expected format (columns: 'title', 'text', 'label' with labels as 0 for true and 1 for fake).
+
+2. Preprocess the text: For Simple_models run the preprocess.py script. For SVM run the preprocessing_SVM.py script. Remember to change the datasetPath and the isOtherDataset variable when using a different dataset (for the Simple_models, you need to change the variables in the config.py).
 
 3. Train and evaluate the classical model: Go to the respective model folder and run the training or main script. For Simple_models run the evaluateClassic.py script. For SVM run the SVM.py script.
 
-4. Train and evaluate the deep learning model: There is no manual preprocessing for the deep learning model. You must first run the data_preparation.py file (which prepares the dataset for use by BERT) and then run BERT_base.py to train it.
+4. Train and evaluate the deep learning model: There is no manual preprocessing for the deep learning model. You must first run the data_preparation.py file (which prepares the dataset for use by BERT) and then run BERT_base.py to train and evaluate it. If you are using a different dataset, remember to change the datasetPath and the isOtherDataset variables in data_preparation.py.
 
 
 📊 Results

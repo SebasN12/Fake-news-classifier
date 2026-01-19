@@ -1,6 +1,8 @@
 import pandas as pd
 
-# Fake News Detection Datasets from Kaggle used here to create a combined CSV
+# Fake News Detection Datasets from Kaggle used here to create a combined CSV. 
+# Change true_path and fake_path when using other splitted datasets. 
+# Remember that the splitted datasets should not be labeled before the merge.
 
 true_path = 'dataset/News_dataset/True.csv'
 fake_path = 'dataset/News_dataset/Fake.csv'

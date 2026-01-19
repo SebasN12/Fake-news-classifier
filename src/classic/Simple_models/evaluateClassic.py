@@ -10,7 +10,7 @@ from sklearn.metrics import (
 )
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from config import ROOT_DIR
+from config import ROOT_DIR, isOtherDataset
 from preprocessing import load_dataset, get_features_and_labels, load_or_create_word_counts
 from classic_model import (
     is_fake1_from_counts,
@@ -48,6 +48,7 @@ def compute_metrics(name, y_true, y_pred):
 
 
 def main():
+    print("Using other dataset?: ", isOtherDataset)
     print("Starting evaluation of classic models...")
     df = load_dataset()
     X, y = get_features_and_labels(df)
@@ -159,7 +160,7 @@ def main():
     # Final Summary as CSV
     # ==========================================================================
     results_df = pd.DataFrame(results)
-    out = os.path.join(ROOT_DIR, "classic_model_metrics.csv")
+    out = os.path.join(ROOT_DIR, "classic_model_metrics_other.csv") if isOtherDataset else os.path.join(ROOT_DIR, "classic_model_metrics.csv")
     results_df.to_csv(out, index=False)
 
     print("\nResults saved in:", out)

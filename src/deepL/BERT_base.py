@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+from data_preparation import isOtherDataset
 from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer, BertForSequenceClassification, get_linear_schedule_with_warmup
 from torch.optim import AdamW
@@ -21,9 +22,14 @@ LR = 2e-5
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-print("Using device:", DEVICE)
-
+reportPath = "metrics/bert_base_report_other.txt" if isOtherDataset else "metrics/bert_base_report.txt"
+reportTitle = "=== BERT-base fine-tuned (other dataset) ===\n\n" if isOtherDataset else "=== BERT-base fine-tuned ===\n\n"
+confusionMatrixPath = "metrics/bert_base_confusion_matrix_other.png" if isOtherDataset else "metrics/bert_base_confusion_matrix.png"
+confusionMatrixTitle = "BERT-base confusion matrix (other dataset)" if isOtherDataset else "BERT-base confusion matrix"
 # --------------------
+
+print("Using device:", DEVICE)
+print("Using other dataset?:", isOtherDataset)
 
 
 train_df = pd.read_csv("dataset/train_DL.csv")
@@ -156,8 +162,8 @@ y_pred_final = preds
 
 os.makedirs("metrics", exist_ok=True)
 
-with open("metrics/bert_base_report.txt", "w") as file:
-    file.write("=== BERT-base fine-tuned ===\n\n")
+with open(reportPath, "w") as file:
+    file.write(reportTitle)
     file.write(f"Test Accuracy: {accuracy_score(y_test, y_pred_final):.4f}\n")
     file.write(f"Test MCC: {matthews_corrcoef(y_test, y_pred_final):.4f}\n\n")
     file.write(
@@ -184,8 +190,8 @@ ax = sns.heatmap(
 
 ax.set_xlabel("Predicted")
 ax.set_ylabel("Actual")
-ax.set_title("BERT-base confusion matrix")
+ax.set_title(confusionMatrixTitle)
 
 plt.tight_layout()
-plt.savefig("metrics/bert_base_confusion_matrix.png", dpi=300)
+plt.savefig(confusionMatrixPath, dpi=300)
 plt.close()
