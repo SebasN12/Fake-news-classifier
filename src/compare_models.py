@@ -26,7 +26,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC, SVC
 
-from classic.Simple_models.classic_model import LinearRegressionClassifier
+from classic.Simple_models.baseline_models import LinearRegressionClassifier
 from classic.Simple_models.config import ROOT_DIR
 from classic.Simple_models.preprocessing import load_dataset, get_features_and_labels, sample_dataset
 
@@ -66,6 +66,31 @@ def summarize_params(params_list):
     return "; ".join([f"{k}={v}" for k, v in best])
 
 
+def split_filter(value):
+    if not value:
+        return []
+    return [item.strip().lower() for item in value.split(",") if item.strip()]
+
+
+def filter_configs(configs, only=None, skip=None):
+    only_filters = split_filter(only)
+    skip_filters = split_filter(skip)
+
+    def matches(name, patterns):
+        name_l = name.lower()
+        return any(pattern in name_l for pattern in patterns)
+
+    filtered = configs
+    if only_filters:
+        filtered = [cfg for cfg in filtered if matches(cfg.name, only_filters)]
+        if not filtered:
+            print("Warning: --only did not match any model names.")
+
+    if skip_filters:
+        filtered = [cfg for cfg in filtered if not matches(cfg.name, skip_filters)]
+
+    return filtered
+
 def evaluate_model_cv(config, X, y, cv, inner_folds, scorer):
     y_true_all = []
     y_pred_all = []
@@ -102,26 +127,56 @@ def evaluate_model_cv(config, X, y, cv, inner_folds, scorer):
     return metrics
 
 
-def build_model_configs(random_seed):
-    def tfidf(ngram_range=(1, 2), max_features=30000, min_df=2, max_df=0.95):
+def build_model_configs(random_seed, low_memory=False):
+    if low_memory:
+        tfidf_defaults = {
+            "ngram_range": (1, 1),
+            "max_features": 15000,
+            "min_df": 5,
+            "max_df": 0.9,
+            "dtype": np.float32,
+        }
+        count_defaults = {
+            "ngram_range": (1, 1),
+            "max_features": 15000,
+            "min_df": 5,
+            "max_df": 0.9,
+        }
+        svm_svd_grid = [100, 200]
+        mlp_svd_grid = [50, 100]
+    else:
+        tfidf_defaults = {
+            "ngram_range": (1, 2),
+            "max_features": 30000,
+            "min_df": 2,
+            "max_df": 0.95,
+        }
+        count_defaults = {
+            "ngram_range": (1, 1),
+            "max_features": 30000,
+            "min_df": 2,
+            "max_df": 0.95,
+        }
+        svm_svd_grid = [200, 300]
+        mlp_svd_grid = [100, 200]
+
+    def tfidf(**overrides):
+        params = dict(tfidf_defaults)
+        params.update(overrides)
         return TfidfVectorizer(
             lowercase=True,
             stop_words="english",
-            ngram_range=ngram_range,
-            max_df=max_df,
-            min_df=min_df,
-            max_features=max_features,
+            **params,
         )
 
-    def count_vec(ngram_range=(1, 1), max_features=30000, min_df=2, max_df=0.95, binary=False):
+    def count_vec(binary=False, **overrides):
+        params = dict(count_defaults)
+        params.update(overrides)
         return CountVectorizer(
             lowercase=True,
             stop_words="english",
-            ngram_range=ngram_range,
-            max_df=max_df,
-            min_df=min_df,
-            max_features=max_features,
             binary=binary,
+            **params,
         )
 
     configs = []
@@ -203,12 +258,12 @@ def build_model_configs(random_seed):
         name="Polynomial SVM",
         estimator=Pipeline([
             ("tfidf", tfidf(ngram_range=(1, 2))),
-            ("svd", TruncatedSVD(n_components=300, random_state=random_seed)),
+            ("svd", TruncatedSVD(n_components=svm_svd_grid[-1], random_state=random_seed)),
             ("scale", StandardScaler()),
             ("clf", SVC(kernel="poly")),
         ]),
         param_grid={
-            "svd__n_components": [200, 300],
+            "svd__n_components": svm_svd_grid,
             "clf__C": [1.0, 10.0],
             "clf__degree": [2, 3],
             "clf__gamma": ["scale"],
@@ -219,12 +274,12 @@ def build_model_configs(random_seed):
         name="RBF SVM",
         estimator=Pipeline([
             ("tfidf", tfidf(ngram_range=(1, 2))),
-            ("svd", TruncatedSVD(n_components=300, random_state=random_seed)),
+            ("svd", TruncatedSVD(n_components=svm_svd_grid[-1], random_state=random_seed)),
             ("scale", StandardScaler()),
             ("clf", SVC(kernel="rbf")),
         ]),
         param_grid={
-            "svd__n_components": [200, 300],
+            "svd__n_components": svm_svd_grid,
             "clf__C": [1.0, 10.0],
             "clf__gamma": ["scale", "auto"],
         },
@@ -234,7 +289,7 @@ def build_model_configs(random_seed):
         name="MLP",
         estimator=Pipeline([
             ("tfidf", tfidf(ngram_range=(1, 2))),
-            ("svd", TruncatedSVD(n_components=200, random_state=random_seed)),
+            ("svd", TruncatedSVD(n_components=mlp_svd_grid[-1], random_state=random_seed)),
             ("scale", StandardScaler()),
             ("clf", MLPClassifier(
                 hidden_layer_sizes=(128,),
@@ -244,7 +299,7 @@ def build_model_configs(random_seed):
             )),
         ]),
         param_grid={
-            "svd__n_components": [100, 200],
+            "svd__n_components": mlp_svd_grid,
             "clf__hidden_layer_sizes": [(128,), (256,)],
             "clf__alpha": [1e-4, 1e-3],
         },
@@ -260,6 +315,9 @@ def run_comparison(
     random_seed=RANDOM_SEED,
     max_samples=None,
     balance_classes=False,
+    only=None,
+    skip=None,
+    low_memory=False,
     deep_model_name="bert-base-uncased",
     deep_epochs=3,
     deep_batch_size=8,
@@ -286,7 +344,11 @@ def run_comparison(
     scorer = make_scorer(f1_score, pos_label="fake")
 
     results = []
-    for config in build_model_configs(random_seed):
+    configs = filter_configs(build_model_configs(random_seed, low_memory=low_memory), only=only, skip=skip)
+    if not configs:
+        raise ValueError("No models selected after applying --only/--skip filters.")
+
+    for config in configs:
         results.append(evaluate_model_cv(config, X, y, cv, inner_folds, scorer))
 
     if include_deep:
@@ -324,6 +386,23 @@ def parse_args():
     parser.add_argument("--random-seed", type=int, default=RANDOM_SEED)
     parser.add_argument("--max-samples", type=float, default=None)
     parser.add_argument("--balance-classes", action="store_true")
+    parser.add_argument(
+        "--only",
+        type=str,
+        default=None,
+        help="Comma-separated substrings of model names to include.",
+    )
+    parser.add_argument(
+        "--skip",
+        type=str,
+        default=None,
+        help="Comma-separated substrings of model names to exclude.",
+    )
+    parser.add_argument(
+        "--low-memory",
+        action="store_true",
+        help="Use smaller TF-IDF vocab and SVD dims to reduce memory usage.",
+    )
     parser.add_argument("--skip-deep", action="store_true")
     parser.add_argument("--deep-model", type=str, default="bert-base-uncased")
     parser.add_argument("--deep-epochs", type=int, default=3)
@@ -348,6 +427,9 @@ def main():
         random_seed=args.random_seed,
         max_samples=args.max_samples,
         balance_classes=args.balance_classes,
+        only=args.only,
+        skip=args.skip,
+        low_memory=args.low_memory,
         deep_model_name=args.deep_model,
         deep_epochs=args.deep_epochs,
         deep_batch_size=args.deep_batch_size,

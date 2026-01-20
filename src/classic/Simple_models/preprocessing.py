@@ -8,15 +8,22 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from string import punctuation
-
-from config import DATA_PATH, DATASET_DIR
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+try:
+    from .config import DATA_PATH, DATASET_DIR
+except ImportError:
+    from config import DATA_PATH, DATASET_DIR
 
 TITLE_COL = "title"
 TEXT_COL = "text"
 LABEL_COL = "is_fake"
 
 stemmer = PorterStemmer()
-stopwords_en = set(stopwords.words('english'))
+
+try:
+    stopwords_en = set(stopwords.words("english"))
+except LookupError:
+    stopwords_en = set(ENGLISH_STOP_WORDS)
 
 def load_dataset(path: str = DATA_PATH) -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -26,7 +33,10 @@ def load_dataset(path: str = DATA_PATH) -> pd.DataFrame:
 
 def count_words(text: str) -> Counter:
     text = text.lower()
-    words = word_tokenize(text)
+    try:
+        words = word_tokenize(text)
+    except LookupError:
+        words = text.split()
     words = [stemmer.stem(w) for w in words if w not in stopwords_en]
     words = [w.strip(punctuation) for w in words if len(w) >= 2]
     return Counter(words)
