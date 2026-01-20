@@ -11,7 +11,7 @@ from sklearn.metrics import (
 )
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from config import ROOT_DIR
+from config import ROOT_DIR, isOtherDataset
 from preprocessing import load_dataset, get_features_and_labels, load_or_create_word_counts
 from baseline_models import (
     is_fake1_from_counts,
@@ -184,6 +184,7 @@ def print_subject_distribution(df, label_col="is_fake", subject_col="subject", t
 
 
 def main():
+    print("Using other dataset?: ", isOtherDataset)
     print("Starting evaluation of classic models...")
     df = load_dataset()
     X, y = get_features_and_labels(df)
@@ -334,7 +335,8 @@ def main():
     results_df = pd.DataFrame(results)
     metrics_dir = os.path.join(ROOT_DIR, "metrics")
     os.makedirs(metrics_dir, exist_ok=True)
-    out = os.path.join(metrics_dir, "classic_model_metrics.csv")
+    metrics_name = "classic_model_metrics_other.csv" if isOtherDataset else "classic_model_metrics.csv"
+    out = os.path.join(metrics_dir, metrics_name)
     results_df.to_csv(out, index=False)
 
     print("\nResults saved in:", out)
