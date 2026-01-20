@@ -142,7 +142,7 @@ def run_transformer_kfold(
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=batch_size,
             learning_rate=learning_rate,
-            evaluation_strategy="no",
+            eval_strategy="no",
             save_strategy="no",
             logging_steps=50,
             report_to=[],

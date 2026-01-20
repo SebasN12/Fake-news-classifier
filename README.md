@@ -75,6 +75,12 @@ pip install -r requirements.txt
 ```
 ⚠️ **Important:** For GPU support with deep learning models, it is recommended to use Python 3.11, due to compatibility issues with some versions of torch and transformers.
 
+To install PyTorch with GPU support, use the command corresponding to your CUDA version. For example, for CUDA 12.1:
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+If you don’t have a GPU or don’t need GPU support, the regular installation from requirements.txt will work fine.
+
 ## 🚀 Usage
 
 1. Prepare your dataset:
