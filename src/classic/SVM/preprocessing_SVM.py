@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import OneHotEncoder
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
@@ -37,9 +36,7 @@ def run_preprocessing():
     X_text = (df['title'] + ' ' + df['text']).fillna('')
     y = df['is_fake']
 
-    X_subject = df[['subject']].fillna('Unknown')
-
-    X_full = pd.concat([X_text.rename('text'), X_subject], axis=1)
+    X_full = pd.concat([X_text.rename('text')], axis=1)
 
     X_train, X_test, y_train, y_test = train_test_split(X_full, y, test_size=0.2, random_state=RANDOM_SEED, stratify=y)
 
@@ -65,13 +62,8 @@ def run_preprocessing():
     X_train_text_vec = vectorizer.fit_transform(X_train['text'])
     X_test_text_vec = vectorizer.transform(X_test['text'])
 
-    # AI for suggestion: OneHotEncoder + sparse matrix handling
-    subject_encoder = OneHotEncoder(sparse_output=True, handle_unknown='ignore')
-    X_train_subject = subject_encoder.fit_transform(X_train[['subject']])
-    X_test_subject = subject_encoder.transform(X_test[['subject']])
-
-    X_train_final = hstack([X_train_text_vec, X_train_subject])
-    X_test_final = hstack([X_test_text_vec, X_test_subject])
+    X_train_final = hstack([X_train_text_vec])
+    X_test_final = hstack([X_test_text_vec])
 
     # -------------------------------
     # Save matrices and transformers with pickle
@@ -92,9 +84,6 @@ def run_preprocessing():
 
     with open('dataset/vectorizer.pkl', 'wb') as file:
         pickle.dump(vectorizer, file)
-
-    with open('dataset/subject_encoder.pkl', 'wb') as file:
-        pickle.dump(subject_encoder, file)
 
     print("Preprocessing complete. Data saved.")
 
