@@ -13,8 +13,7 @@ def run_data_preparation():
 
     df["text"] = (
         df["title"].fillna("") + " " +
-        df["text"].fillna("") + " [SEP] " +
-        df["subject"].fillna("unknown")
+        df["text"].fillna("") + " [SEP] "
     )
 
     y = df["is_fake"]
