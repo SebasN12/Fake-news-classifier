@@ -1,14 +1,30 @@
 import pandas as pd
 import torch
+import random
+import numpy as np
 from data_preparation import isOtherDataset
 from torch.utils.data import Dataset, DataLoader
-from transformers import BertTokenizer, BertForSequenceClassification, get_linear_schedule_with_warmup
+from transformers import BertTokenizer, BertForSequenceClassification, get_linear_schedule_with_warmup, set_seed
 from torch.optim import AdamW
 from tqdm import tqdm
 from sklearn.metrics import classification_report, accuracy_score, matthews_corrcoef, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
+
+# Set random seeds for reproducibility
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
+torch.manual_seed(RANDOM_SEED)
+
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(RANDOM_SEED)
+
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
+set_seed(RANDOM_SEED)
 
 # --------------------
 # Config
@@ -70,7 +86,7 @@ test_dataset = NewsDataset(
     test_df["label"].tolist()
 )
 
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, worker_init_fn=lambda worker_id: np.random.seed(RANDOM_SEED + worker_id))
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
 
 # --------------------
