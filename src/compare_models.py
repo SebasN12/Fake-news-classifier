@@ -209,7 +209,6 @@ def build_model_configs(random_seed, low_memory=False):
             ("clf", LogisticRegression(
                 max_iter=2000,
                 random_state=random_seed,
-                multi_class="multinomial",
                 solver="lbfgs",
             )),
         ]),

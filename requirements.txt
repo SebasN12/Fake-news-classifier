@@ -6,4 +6,5 @@ accelerate>=0.26
 scikit-learn
 matplotlib
 seaborn
-nltk
+nltk==3.8.1
+tqdm
