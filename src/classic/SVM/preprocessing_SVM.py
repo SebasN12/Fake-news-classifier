@@ -68,7 +68,7 @@ def run_preprocessing():
     # -------------------------------
     # Save matrices and transformers with pickle
     # -------------------------------
-    # AI for using pickle for saving
+    # AI for suggestion of using pickle for saving the preprocessed text
 
     with open('dataset/X_train_final.pkl', 'wb') as file:
         pickle.dump(X_train_final, file)

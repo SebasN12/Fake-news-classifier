@@ -73,7 +73,9 @@ You can install them all at once with:
 ```bash
 pip install -r requirements.txt
 ```
-⚠️ **Important:** For GPU support with deep learning models, it is recommended to use Python 3.11, due to compatibility issues with some versions of torch and transformers.
+⚠️ **Important:** For GPU support with deep learning models, it is strongly recommended to use Python 3.11. Newer Python versions (e.g. Python 3.12 and 3.13) may cause installation or runtime errors due to incomplete compatibility with PyTorch and Hugging Face Transformers. If you want more information, please refer to the official communities dissussions: 
+- PyTorch forum discussion: https://discuss.pytorch.org/t/unable-to-install-pytorch-on-python-3-13/212112. 
+- Hugging Face Transformers issue: https://github.com/huggingface/transformers/issues/35443.
 
 To install PyTorch with GPU support, use the command corresponding to your CUDA version. For example, for CUDA 12.1:
 ```bash

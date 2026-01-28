@@ -12,6 +12,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
+#AI was used here for BERT coding. It was used for suggestions, workflow design, and resolving errors and incompatibilities.
+
 # Set random seeds for reproducibility
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
