@@ -18,19 +18,39 @@ TITLE_COL = "title"
 TEXT_COL = "text"
 LABEL_COL = "is_fake"
 
+# Stemmer used for lightweight normalization in counting models.
 stemmer = PorterStemmer()
 
-try:
+# Ensure required NLTK resources are available without hard-failing.
+def _ensure_nltk_resource(resource: str) -> bool:
+    try:
+        if resource == "punkt":
+            word_tokenize("test")
+        elif resource == "stopwords":
+            stopwords.words("english")
+        return True
+    except LookupError:
+        try:
+            import nltk
+            nltk.download(resource, quiet=True)
+            return True
+        except Exception:
+            return False
+
+_ensure_nltk_resource("punkt")
+if _ensure_nltk_resource("stopwords"):
     stopwords_en = set(stopwords.words("english"))
-except LookupError:
+else:
     stopwords_en = set(ENGLISH_STOP_WORDS)
 
+# Load dataset and build a combined text body (title + text).
 def load_dataset(path: str = DATA_PATH) -> pd.DataFrame:
     df = pd.read_csv(path)
     df[LABEL_COL] = df[LABEL_COL].astype(bool)
     df["body"] = (df["title"].fillna("") + " " + df["text"].fillna("")).astype(str)
     return df
 
+# Tokenize, normalize, and count words for the counting baselines.
 def count_words(text: str) -> Counter:
     text = text.lower()
     try:
@@ -41,6 +61,7 @@ def count_words(text: str) -> Counter:
     words = [w.strip(punctuation) for w in words if len(w) >= 2]
     return Counter(words)
 
+# Cache word-counts to avoid reprocessing on repeated runs.
 def load_or_create_word_counts(df: pd.DataFrame):
     counts_path = os.path.join(DATASET_DIR, "body_counts.pkl")
 
@@ -53,11 +74,13 @@ def load_or_create_word_counts(df: pd.DataFrame):
         pickle.dump(body_counts, f)
     return body_counts
 
+# Extract model-ready text features and string labels.
 def get_features_and_labels(df: pd.DataFrame) -> Tuple[pd.Series, list]:
     X = df["body"].astype(str).values
     y = df[LABEL_COL].map({False: "real", True: "fake"}).values
     return X, y
 
+# Optional downsampling and class balancing for faster experiments.
 def sample_dataset(X, y, max_samples=None, random_seed=42, balance_classes=False):
     X = np.asarray(X)
     y = np.asarray(y)

@@ -4,6 +4,7 @@ from sklearn.linear_model import LogisticRegression
 
 RANDOM_SEED = 42
 
+# TF-IDF + logistic regression pipeline for classic baseline.
 def get_pipeline():
     return Pipeline([
         ("tfidf", TfidfVectorizer(
@@ -17,6 +18,7 @@ def get_pipeline():
         ("clf", LogisticRegression(max_iter=2000, random_state=RANDOM_SEED)),
     ])
 
+# Minimal hyperparameter grid for CV.
 def get_param_grid():
     return {
         "clf__C": [0.1, 1.0]

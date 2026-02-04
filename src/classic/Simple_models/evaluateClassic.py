@@ -7,24 +7,26 @@ import pandas as pd
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
-    confusion_matrix, matthews_corrcoef
+    confusion_matrix, matthews_corrcoef, make_scorer
 )
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 from config import ROOT_DIR, isOtherDataset
 from preprocessing import load_dataset, get_features_and_labels, load_or_create_word_counts
 from baseline_models import (
     is_fake1_from_counts,
-    is_fake2_from_counts,
-    classify_linear_regression,
-    get_linear_regression_model
+    is_fake2_from_counts
 )
 from LogReg import get_pipeline, get_param_grid
+from LinearReg import get_vectorizer, classify_linear_regression, get_linear_regression_model
+from NaiveBayes_models import (
+    get_bnb_vectorizer, get_bnb_model,
+    get_mnb_vectorizer, get_mnb_model
+)
 
 
 RANDOM_SEED = 42
 
 
+# Aggregate metrics for a full run and return a metrics dict.
 def compute_metrics(name, y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred, labels=["real", "fake"])
     tn, fp, fn, tp = cm.ravel()
@@ -48,6 +50,7 @@ def compute_metrics(name, y_true, y_pred):
     }
 
 
+# Lightweight metrics helper for fold-level reporting.
 def compute_metrics_dict(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred, labels=["real", "fake"])
     tn, fp, fn, tp = cm.ravel()
@@ -64,6 +67,7 @@ def compute_metrics_dict(y_true, y_pred):
     }
 
 
+# Print a fold summary to trace CV stability.
 def print_fold_metrics(name, fold, y_true, y_pred):
     metrics = compute_metrics_dict(y_true, y_pred)
     print(f"\n{name} Fold {fold} Metrics:")
@@ -77,12 +81,14 @@ def print_fold_metrics(name, fold, y_true, y_pred):
     print(f"MCC      : {metrics['MCC']:.4f}")
 
 
+# Inspect top tokens for each class to interpret the heuristics.
 def print_top_words(counter, label, top_n=10):
     print(f"Top {top_n} {label} words:")
     for word, count in counter.most_common(top_n):
         print(f"  {word}: {count}")
 
 
+# Show most positive/negative TF-IDF features in logistic regression.
 def print_top_logreg_features(vectorizer, clf, top_n=10):
     feature_names = np.array(vectorizer.get_feature_names_out())
     coefs = clf.coef_.ravel()
@@ -97,6 +103,7 @@ def print_top_logreg_features(vectorizer, clf, top_n=10):
         print(f"  {feature_names[idx]}: {coefs[idx]:.4f}")
 
 
+# Compare overlap of top tokens between fake and real counters.
 def print_overlap_counts(fake_counts, real_counts, top_n=10):
     fake_top = [w for w, _ in fake_counts.most_common(top_n)]
     real_top = [w for w, _ in real_counts.most_common(top_n)]
@@ -110,6 +117,7 @@ def print_overlap_counts(fake_counts, real_counts, top_n=10):
         print(f"  {word}: {fake_counts[word]}")
 
 
+# Quick bias check: label distribution for hand-picked keywords.
 def print_keyword_label_distribution(texts, labels, keywords):
     text_series = pd.Series(texts).fillna("").astype(str)
     labels = np.asarray(labels)
@@ -141,6 +149,7 @@ def print_keyword_label_distribution(texts, labels, keywords):
         )
 
 
+# Summarize subject distribution and extreme fake ratios to spot leakage.
 def print_subject_distribution(df, label_col="is_fake", subject_col="subject", top_n=10, min_count=50):
     if subject_col not in df.columns:
         print("\nNo subject column found.")
@@ -183,6 +192,7 @@ def print_subject_distribution(df, label_col="is_fake", subject_col="subject", t
         print(f"  {subject}: real={real_count} fake={fake_count} total={total}")
 
 
+# Main entry: load data, run diagnostics, evaluate baselines, and save metrics.
 def main():
     print("Using other dataset?: ", isOtherDataset)
     print("Starting evaluation of classic models...")
@@ -198,12 +208,14 @@ def main():
         keywords=["reuters", "washington", "featured", "image", "watch", "com"],
     )
 
+    # 5-fold stratified CV for all classic baselines.
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_SEED)
     results = []
 
     # ==========================================================================
     # COUNTING MODELS
     # ==========================================================================
+    # Token-count heuristics using class-wise counters.
     print("\n=== COUNTING MODELS ===")
 
     print("\n-> Evaluating is_fake1")
@@ -260,6 +272,7 @@ def main():
     # ==========================================================================
     # LOGISTIC REGRESSION TF-IDF GRIDSEARCH
     # ==========================================================================
+    # TF-IDF + logistic regression with a small C grid.
     print("\n=== LOGISTIC REGRESSION ===")
 
     pipeline = get_pipeline()
@@ -267,6 +280,7 @@ def main():
 
     y_true_lr, y_pred_lr = [], []
     best_params = []
+    mcc_scorer = make_scorer(matthews_corrcoef)
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), start=1):
         print(f"Fold {fold}")
@@ -276,7 +290,7 @@ def main():
             pipeline,
             param_grid,
             cv=skf,
-            scoring="accuracy",
+            scoring=mcc_scorer,
             n_jobs=1,
             verbose=0,
         )
@@ -299,13 +313,10 @@ def main():
     # ==========================================================================
     # LINEAR REGRESSION BASELINE
     # ==========================================================================
+    # Linear regression on TF-IDF with a hard 0.5 threshold.
     print("\n=== LINEAR REGRESSION BASELINE ===")
 
-    vectorizer = TfidfVectorizer(
-        max_features=20000,
-        stop_words="english",
-        lowercase=True
-    )
+    vectorizer = get_vectorizer()
     y_bool = (y == "fake").astype(int)
 
     y_true_lr, y_pred_lr = [], []
@@ -330,8 +341,57 @@ def main():
     results.append(compute_metrics("Linear Regression", y_true_s, y_pred_s))
 
     # ==========================================================================
+    # BERNOULLI NAIVE BAYES
+    # ==========================================================================
+    # Binary count features + BernoulliNB.
+    print("\n=== BERNOULLI NAIVE BAYES ===")
+
+    vectorizer = get_bnb_vectorizer()
+    y_true_nb, y_pred_nb = [], []
+
+    for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), start=1):
+        print(f"Fold {fold}")
+
+        X_train = vectorizer.fit_transform(X[train_idx])
+        X_val = vectorizer.transform(X[val_idx])
+
+        model = get_bnb_model()
+        model.fit(X_train, y[train_idx])
+
+        preds = model.predict(X_val)
+        y_true_nb.extend(y[val_idx])
+        y_pred_nb.extend(preds)
+
+    results.append(compute_metrics("Bernoulli Naive Bayes", np.array(y_true_nb), np.array(y_pred_nb)))
+
+    # ==========================================================================
+    # MULTINOMIAL NAIVE BAYES
+    # ==========================================================================
+    # TF-IDF features + MultinomialNB.
+    print("\n=== MULTINOMIAL NAIVE BAYES ===")
+
+    vectorizer = get_mnb_vectorizer()
+    y_true_mnb, y_pred_mnb = [], []
+
+    for fold, (train_idx, val_idx) in enumerate(skf.split(X, y), start=1):
+        print(f"Fold {fold}")
+
+        X_train = vectorizer.fit_transform(X[train_idx])
+        X_val = vectorizer.transform(X[val_idx])
+
+        model = get_mnb_model()
+        model.fit(X_train, y[train_idx])
+
+        preds = model.predict(X_val)
+        y_true_mnb.extend(y[val_idx])
+        y_pred_mnb.extend(preds)
+
+    results.append(compute_metrics("Multinomial Naive Bayes", np.array(y_true_mnb), np.array(y_pred_mnb)))
+
+    # ==========================================================================
     # Final Summary as CSV
     # ==========================================================================
+    # Persist the metrics for report tables.
     results_df = pd.DataFrame(results)
     metrics_dir = os.path.join(ROOT_DIR, "metrics")
     os.makedirs(metrics_dir, exist_ok=True)

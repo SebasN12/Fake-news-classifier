@@ -26,7 +26,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC, SVC
 
-from classic.Simple_models.baseline_models import LinearRegressionClassifier
+from classic.Simple_models.LinearReg import LinearRegressionClassifier
 from classic.Simple_models.config import ROOT_DIR
 from classic.Simple_models.preprocessing import load_dataset, get_features_and_labels, sample_dataset
 
