@@ -64,9 +64,12 @@ pandas
 scikit-learn
 matplotlib
 seaborn
-torch
-transformers
-nltk
+torch>=2.1
+transformers>=4.56,<5.0
+accelerate>=0.26
+nltk==3.8.1
+tqdm
+scipy
 ```
 
 You can install them all at once with:
@@ -91,9 +94,14 @@ If you don’t have a GPU or don’t need GPU support, the regular installation 
 - If your dataset is splitted into fake and true news files, you can use the combine_dataset.py script to merge them into a single CSV file. The splitted files should not be labeled before combining.
 - If your dataset has different column names or label formats, use the dataset_adapter.py script to convert it to the expected format (columns: 'title', 'text', 'label' with labels as 0 for true and 1 for fake).
 
-2. Preprocess the text: For Simple_models run the preprocess.py script. For SVM run the preprocessing_SVM.py script. Remember to change the datasetPath and the isOtherDataset variable when using a different dataset (for the Simple_models, you need to change the variables in the config.py).
+2. 
+Classic models (recommended path): run evaluateClassic.py for the Simple_models suite. It handles preprocessing internally.
+If you use a different dataset, update the dataset settings in config.py.
+For SVM: run preprocessing_SVM.py first, then SVM.py. Update datasetPath/isOtherDataset in preprocessing_SVM.py if needed.
 
-3. Train and evaluate the classical model: Go to the respective model folder and run the training or main script. For Simple_models run the evaluateClassic.py script. For SVM run the SVM.py script.
+3. Train and evaluate the classical model:
+Simple_models: evaluateClassic.py (preprocessing is built-in).
+SVM: SVM.py (after preprocessing_SVM.py).
 
 4. Train and evaluate the deep learning model: There is no manual preprocessing for the deep learning model. You must first run the data_preparation.py file (which prepares the dataset for use by BERT) and then run BERT_base.py to train and evaluate it. If you are using a different dataset, remember to change the datasetPath and the isOtherDataset variables in data_preparation.py.
 
