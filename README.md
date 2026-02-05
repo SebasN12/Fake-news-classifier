@@ -101,7 +101,7 @@ If you use a different dataset, update the dataset settings in config.py.
 SVM: run preprocessing_SVM.py first, then SVM.py. Update datasetPath/isOtherDataset in preprocessing_SVM.py if needed.
 
 3. Train and evaluate the classical models:
-Simple_models: evaluateClassic.py (preprocessing is built-in).
+Simple_models: evaluateSimple.py (preprocessing is built-in).
 SVM: SVM.py (after preprocessing_SVM.py).
 
 4. Train and evaluate the deep learning model: There is no manual preprocessing for the deep learning model. You must first run the data_preparation.py file (which prepares the dataset for use by BERT) and then run BERT_base.py to train and evaluate it. If you are using a different dataset, remember to change the datasetPath and the isOtherDataset variables in data_preparation.py.
