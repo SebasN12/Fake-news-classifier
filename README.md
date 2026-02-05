@@ -94,8 +94,7 @@ If you don’t have a GPU or don’t need GPU support, the regular installation 
 - If your dataset is splitted into fake and true news files, you can use the combine_dataset.py script to merge them into a single CSV file. The splitted files should not be labeled before combining.
 - If your dataset has different column names or label formats, use the dataset_adapter.py script to convert it to the expected format (columns: 'title', 'text', 'label' with labels as 0 for true and 1 for fake).
 
-2. 
-Classic models (recommended path): run evaluateClassic.py for the Simple_models suite. It handles preprocessing internally.
+2. Classic models (recommended path): run evaluateClassic.py for the Simple_models suite. It handles preprocessing internally.
 If you use a different dataset, update the dataset settings in config.py.
 For SVM: run preprocessing_SVM.py first, then SVM.py. Update datasetPath/isOtherDataset in preprocessing_SVM.py if needed.
 
