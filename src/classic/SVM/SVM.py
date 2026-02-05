@@ -2,7 +2,7 @@ from pathlib import Path
 import pickle
 from preprocessing_SVM import isOtherDataset
 from sklearn.svm import SVC
-from sklearn.model_selection import RandomizedSearchCV, train_test_split, cross_val_score
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from sklearn.metrics import classification_report, accuracy_score, matthews_corrcoef, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
