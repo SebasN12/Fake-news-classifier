@@ -27,7 +27,7 @@ fake-news-classifier/
 ├── src/                           ← source code
 │   ├── classic/                   ← preprocessing and classical ML model implementation, training and evaluation
 │   │   |
-│   │   ├── Simple_models/         ← simple ML models (e.g. counting, Linear Regression, Logistic Regression)
+│   │   ├── Simple_models/         ← simple ML models (e.g. counting, Linear Regression, Logistic Regression, Naive Bayes)
 │   │   │
 │   │   └── SVM/
 │   │
@@ -95,11 +95,12 @@ If you don’t have a GPU or don’t need GPU support, the regular installation 
 - If your dataset has different column names or label formats, use the dataset_adapter.py script to convert it to the expected format (columns: 'title', 'text', 'label' with labels as 0 for true and 1 for fake).
 
 2. 
-Classic models (recommended path): run evaluateClassic.py for the Simple_models suite. It handles preprocessing internally.
+Classic models (recommended path): 
+Simple Models: run evaluateSimple.py for the Simple_models suite. It handles preprocessing internally.
 If you use a different dataset, update the dataset settings in config.py.
-For SVM: run preprocessing_SVM.py first, then SVM.py. Update datasetPath/isOtherDataset in preprocessing_SVM.py if needed.
+SVM: run preprocessing_SVM.py first, then SVM.py. Update datasetPath/isOtherDataset in preprocessing_SVM.py if needed.
 
-3. Train and evaluate the classical model:
+3. Train and evaluate the classical models:
 Simple_models: evaluateClassic.py (preprocessing is built-in).
 SVM: SVM.py (after preprocessing_SVM.py).
 
