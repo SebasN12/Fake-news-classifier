@@ -17,11 +17,15 @@ print('Using other dataset?: ', isOtherDataset)
 # Evaluation output file paths
 # --------------------------------
 
+METRICS_DIR = Path("metrics")
+METRICS_DIR.mkdir(exist_ok=True)
+
 # Paths
-basicReportPath = 'metrics/svm_basic_report_other.txt' if isOtherDataset else 'metrics/svm_basic_report.txt'
-basicConfusionMatrixPath = 'metrics\\svm_basic_confusion_matrix_other.png' if isOtherDataset else 'metrics\\svm_basic_confusion_matrix.png'
-finalReportPath = 'metrics/svm_final_report_other.txt' if isOtherDataset else 'metrics/svm_final_report.txt'
-finalConfusionMatrixPath = 'metrics\\svm_final_confusion_matrix_other.png' if isOtherDataset else 'metrics\\svm_final_confusion_matrix.png'
+
+basicReportPath = METRICS_DIR / ("svm_basic_report_other.txt" if isOtherDataset else "svm_basic_report.txt")
+basicConfusionMatrixPath = METRICS_DIR / ("svm_basic_confusion_matrix_other.png" if isOtherDataset else "svm_basic_confusion_matrix.png")
+finalReportPath = METRICS_DIR / ("svm_final_report_other.txt" if isOtherDataset else "svm_final_report.txt")
+finalConfusionMatrixPath = METRICS_DIR / ("svm_final_confusion_matrix_other.png" if isOtherDataset else "svm_final_confusion_matrix.png")
 
 # output titles
 
@@ -37,13 +41,12 @@ finalConfusionMatrixTitle = 'SVM with Hyperparameter tuning Confusion matrix (ot
 
 print("Loading preprocessed data...")
 
-X_train_final = pickle.load(open('dataset/X_train_final.pkl', 'rb'))
-X_test_final = pickle.load(open('dataset/X_test_final.pkl', 'rb'))
-y_train = pickle.load(open('dataset/y_train.pkl', 'rb'))
-y_test = pickle.load(open('dataset/y_test.pkl', 'rb'))
+DATASET_DIR = Path("dataset")
 
-#directory for metrics
-Path('metrics').mkdir(exist_ok=True)
+X_train_final = pickle.load(open(DATASET_DIR / "X_train_final.pkl", 'rb'))
+X_test_final = pickle.load(open(DATASET_DIR / "X_test_final.pkl", 'rb'))
+y_train = pickle.load(open(DATASET_DIR / "y_train.pkl", 'rb'))
+y_test = pickle.load(open(DATASET_DIR / "y_test.pkl", 'rb'))
 
 # -------------------------------
 # Version 1: Basic SVM training

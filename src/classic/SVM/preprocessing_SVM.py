@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
@@ -12,7 +13,9 @@ RANDOM_SEED = 42
 
 # Change these variables if using other dataset
 isOtherDataset = False
-datasetPath = 'dataset/all_news.csv'
+DATASET_DIR = Path("dataset")
+
+datasetPath = DATASET_DIR / "converted_dataset.csv"
 
 
 
@@ -31,6 +34,8 @@ def run_preprocessing():
     nltk.download('punkt')
     nltk.download('stopwords')
 
+    DATASET_DIR.mkdir(exist_ok=True)
+
     df = pd.read_csv(datasetPath)
 
     X_text = (df['title'] + ' ' + df['text']).fillna('')
@@ -45,11 +50,11 @@ def run_preprocessing():
     test_df = pd.concat([X_test, y_test], axis=1)
 
     if isOtherDataset:
-        train_df.to_csv('dataset\\other_train.csv', index=False)
-        test_df.to_csv('dataset\\other_test.csv', index=False)
+        train_df.to_csv(DATASET_DIR / "other_train.csv", index=False)
+        test_df.to_csv(DATASET_DIR / "other_test.csv", index=False)
     else:
-        train_df.to_csv('dataset\\train.csv', index=False)
-        test_df.to_csv('dataset\\test.csv', index=False)
+        train_df.to_csv(DATASET_DIR / "train.csv", index=False)
+        test_df.to_csv(DATASET_DIR / "test.csv", index=False)
 
     # -------------------------------
     # Text preprocessing functions
@@ -70,19 +75,19 @@ def run_preprocessing():
     # -------------------------------
     # AI for suggestion of using pickle for saving the preprocessed text
 
-    with open('dataset/X_train_final.pkl', 'wb') as file:
+    with open(DATASET_DIR / "X_train_final.pkl", 'wb') as file:
         pickle.dump(X_train_final, file)
 
-    with open('dataset/X_test_final.pkl', 'wb') as file:
+    with open(DATASET_DIR / "X_test_final.pkl", 'wb') as file:
         pickle.dump(X_test_final, file)
 
-    with open('dataset/y_train.pkl', 'wb') as file:
+    with open(DATASET_DIR / "y_train.pkl", 'wb') as file:
         pickle.dump(y_train, file)
 
-    with open('dataset/y_test.pkl', 'wb') as file:
+    with open(DATASET_DIR / "y_test.pkl", 'wb') as file:
         pickle.dump(y_test, file)
 
-    with open('dataset/vectorizer.pkl', 'wb') as file:
+    with open(DATASET_DIR / "vectorizer.pkl", 'wb') as file:
         pickle.dump(vectorizer, file)
 
     print("Preprocessing complete. Data saved.")
